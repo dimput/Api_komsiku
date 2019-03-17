@@ -22,35 +22,14 @@
     <!-- Jumbotron Bootstrap -->
     <div class="jumbotron">
         <div class="container">
-            <h1 class="display-4">Welcome To Tiket Murah!</h1>
-            <p class="lead">Website untuk mencari Tiket Murah. Website ini menggunakan Tiket.com API</p>
+            <h1 class="display-4">Welcome Cari Film!</h1>
+            <p class="lead">Website untuk mencari Film. Website ini menggunakan The Movie Database API</p>
             <hr class="my-4">
-            <h5>CARI TIKET</h5>
+            <h5>CARI Movie</h5>
             <form action="#">
-            <label for="a">tujuan</label>
-            <select name="a" id="tujuan" data-style="btn-new">
-                <option value="CGK">CGK - Jakarta</option>
-                <option value="DPS">DPS - Bali</option>
-                <option value="JOG">JOG - Yogyakarta</option>
-            </select>
-            <label for="d">dari</label>
-            <select name="d" id="dari">
-                <option value="CGK">CGK - Jakarta</option>
-                <option value="DPS">DPS - Bali</option>
-            </select>
-            <label for="adult">Penumpang</label>
-            <select name="adult" id="penumpang">
-                <option value="1">1 Dewasa</option>
-                <option value="2">2 Dewasa</option>
-            </select>
-            <input type="date" name="date">
-            <input type="date" name="ret_date">        
+            <label for="query">Judul</label>
+                <input type="text" name="query">
             <input type="submit" value="submit" class="btn btn-primary btn-lg">
-            <input type="hidden" name="output" value="json">
-            <input type="hidden" name="v" value="1">
-            <input type="hidden" name="infant" value="0">
-            <input type="hidden" name="child" value="0">
-            <input type="hidden" name="token" value="21dcf8e7dd032744361f322c60943b374bfe3fca">
             </form>
         </div>
     </div>
@@ -59,50 +38,38 @@
     <div class="container">
         <h3>Hasil Pencarian</h3>
         <div class="hasil">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <!-- GET DATA from API TIKET.COM -->
         <?php
-            if(!empty($_GET['a'])){
-            $string = file_get_contents("http://api-sandbox.tiket.com/search/flight?a=".$_GET['a']."&d=".$_GET['d']."&date=".$_GET['date']."&ret_date=".$_GET['a']);
+            if(!empty($_GET['query'])){
+            $query = $_GET['query'];
+
+            $string = file_get_contents("https://api.themoviedb.org/3/search/movie?api_key=70cdeab72720dc1a144f4d142a9189c6&language=en-US&query=".$query."&include_adult=false");
             // $string = file_get_contents("muti.json");
             $json = json_decode($string, true);
 
-            echo '
-                <p class="lead">Ditemukan '
-                    .count($json['returns']['result']).
-                ' dari Hasil Pencarian Tiket Pesawat dari '
-                    .$json['search_queries']['from'].
-                ' menuju '
-                    .$json['search_queries']['to'].
-                ' tanggal '
-                    .$json['search_queries']['date'].
-                '</p>
-            ';
-
-            print_r($json);
+            // print_r($json);
             $no=1;
-            for($i=0;$i <count($json['returns']['result']); $i++){
-
-                $detail_info = $json['returns']['result'][$i]['flight_infos']['flight_info'][0];
-                $detail_pesawat = $json['returns']['result'][$i];
-
-                $nama = $detail_info['airlines_name'];
-                $img = $detail_info['img_src'];
-                $harga = $detail_pesawat['price_value'];
-                $flight_number = $detail_info['flight_number'];
-                $deperatur = $detail_info['simple_departure_time'];
-                $arrival = $detail_info['simple_arrival_time'];
+            for($i=0;$i <count($json['results']); $i++){
+            $title = $json['results'][$i]['title'];
+            $release_date = $json['results'][$i]['release_date'];
+            $rate = $json['results'][$i]['vote_average'];
+            $sinopsis = $json['results'][$i]['overview'];
+            $img = "https://image.tmdb.org/t/p/w500".$json['results'][$i]['poster_path']."";
 
             echo
                 '<div class="card" style="padding:20px 50px;">
                     <div class="row">
                         <div class="col-md-2">
-                            <img src="'.$img.'" alt="gambar">                        
+                            <img src="'.$img.'" alt="gambar" style="width:100%;">                        
                         </div>
                         <div class="col-sm-10">
-                           <div class="row"><h5>'.$nama.' </h5> ('.$flight_number.')</div>
-                           <div class="text-success row"><h6>Rp '.number_format($harga,2,',','.').'</h6></div>
-                           <div class="row">'.$deperatur.' - '.$arrival.'</div>
+                           <div class="row"><h5>'.$title.' </h5> ('.$release_date.')</div>
+                           <div class="text-success row"><h6>Rating : '.$rate.'</h6></div>
+                           <div class="row">
+                                <p style="font-weight:bold">Sinopsis</p>
+                                <p>'.$sinopsis.'</p>
+                           </div>
                         </div> 
                         '.
                     '<br />
